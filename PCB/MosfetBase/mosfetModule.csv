@@ -1,0 +1,9 @@
+"Id";"Designator";"Package";"Quantity";"Designation";"Supplier and ref";
+1;"REF**,REF**,REF**,REF**";"MountingHole_3.2mm_M3";4;"MountingHole_3.2mm_M3";;;
+2;"R16,R14,R12,R10,R8,R6,R4,R2";"R_0805_2012Metric";8;"10k";;;
+3;"R15,R13,R11,R9,R7,R5,R3,R1";"R_0805_2012Metric";8;"22R";;;
+4;"Q8,Q7,Q6,Q5,Q4,Q3,Q2,Q1";"SOT-23";8;"AO3400A";;;
+5;"J6,J5,J4,J3";"TerminalBlock_Phoenix_MKDS-1,5-3-5.08_1x03_P5.08mm_Horizontal";4;"point";;;
+6;"J2";"TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal";1;"power";;;
+7;"J1";"TerminalBlock_Phoenix_MKDS-1,5-8-5.08_1x08_P5.08mm_Horizontal";1;"toDCCnext";;;
+8;"D8,D7,D6,D5,D4,D3,D2,D1";"D_SMC";8;"B340";;;
