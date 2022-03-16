@@ -1,6 +1,6 @@
 #include "../config.h"
 
-#ifdef L_NET
+#ifdef LNET
 
 #ifndef LOCONET_INCLUDED
 #define LOCONET_INCLUDED
@@ -609,4 +609,4 @@ extern void notifyLNCVprogrammingStop( uint16_t ArtNr, uint16_t ModuleAddress ) 
 
 #endif
 
-#endif // ifdef, L_NET
+#endif // ifdef, LNET

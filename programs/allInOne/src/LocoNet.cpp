@@ -66,9 +66,12 @@
 // Uncomment to enable SV Processing Debug Print statements
 //#define DEBUG_SV
 
+
+#include "../config.h"
+#ifdef LNET
+
 #include "LocoNet.h"
 
-#ifdef L_NET 
 
 #include "ln_sw_uart.h"
 #include "ln_config.h"

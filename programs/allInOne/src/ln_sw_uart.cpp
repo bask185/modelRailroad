@@ -38,6 +38,11 @@
  * 
  *****************************************************************************/
 
+
+#include "../config.h"
+#ifdef LNET
+
+
 #include <avr/io.h>
 #include <avr/interrupt.h>
 #include <string.h>
@@ -378,3 +383,4 @@ LN_STATUS sendLocoNetPacketTry(lnMsg *TxData, unsigned char ucPrioDelay)
 }
 
 
+#endif

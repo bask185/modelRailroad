@@ -30,7 +30,7 @@
 
 #include "XpressNetMaster.h"
 
-#ifdef X_NET
+#ifdef XNET
 
 #ifndef DEBUG
 

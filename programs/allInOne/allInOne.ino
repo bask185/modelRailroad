@@ -12,12 +12,12 @@ bool        getAddress ;
 Debounce    configBtn( configPin ) ;
 
 /******* INTERFACE *******/
-#if   defined X_NET
+#if   defined XNET
     #include "src/XpressNetMaster.h"
     const int RS485DIR = 2 ;
     XpressNetMasterClass Xnet ;
 
-#elif defined L_NET
+#elif defined LNET
     #include "src/LocoNet.h"
     const int LNtxPin = 0 ;  
     lnMsg  *LnPacket;          // pointer to a received LNet packet  
@@ -77,7 +77,7 @@ Debounce    configBtn( configPin ) ;
     const int nAddresses = nRelays ;
     const int relay[nRelays]   = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, A0, A1, A2, A3, A4 } ;
 
-#elif defined OCCUPANCY || defined CONTROL_PANEL                                // both OCCUPANCY detector as switch panel use same inputs
+#elif defined OCCUPANCY || defined CONTROLPANEL                                // both OCCUPANCY detector as switch panel use same inputs
     const int nAddresses = 0xFF ;
     const int nSensors = 16 ;
     const int sensorPin[nSensors] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, A0, A1, A2, A3, A4 } ;
@@ -108,7 +108,7 @@ Debounce    configBtn( configPin ) ;
 
 void sendOPC_SW_REQ(int address, byte dir, byte on)
 {
-#ifdef L_NET
+#ifdef LNET
     lnMsg SendPacket ;
     
     int sw2 = 0x00 ;
@@ -199,17 +199,17 @@ void notifyDccAccTurnoutOutput ( uint16 Addr, uint8 Direction, uint8 OutputPower
 /********* TRANSMITT FUNCTIONS *********/
 void sendState( uint8 IO, uint8 state )
 {
-#if defined X_NET                                                               // if Xnet, send accesory instruction
+#if defined XNET                                                               // if Xnet, send accesory instruction
     Xnet.SetTrntPos( myAddress + IO , 1, state ) ;
     delay( 20 ) ;
     Xnet.SetTrntPos( myAddress + IO , 0, state ) ;
 
-#elif defined L_NET
+#elif defined LNET
     #if defined OCCUPANCY
     // Lnet.sendFeedback() ;                                                    // to be filled in (check for difference in turnout command or OCCUPANCY info)
 
-    #elif defined CONTROL_PANEL
-    setLNTurnout( myAddress + IO, state )
+    #elif defined CONTROLPANEL
+    setLNTurnout( myAddress + IO, state ) ;
 
     #endif
 #endif
@@ -225,9 +225,9 @@ void setup()
         EEPROM.put( ADDRESS, myAddress ) ;
     }
 
-#if defined X_NET
+#if defined XNET
     Xnet.setup( Loco128 ,RS485DIR ) ;
-#elif defined L_NET
+#elif defined LNET
     LocoNet.init(LNtxPin);
 #elif defined DCC
     //dcc.init( /* add paramterts */ ) ;
@@ -249,10 +249,10 @@ void loop()
 
 
 /******* INTERFACE HANDLING *******/
-#if defined X_NET                                                               // Xnet
+#if defined XNET                                                               // Xnet
     Xnet.update() ;
 
-#elif defined L_NET                                                             // Lnet
+#elif defined LNET                                                             // Lnet
     LnPacket = LocoNet.receive() ;
     if( LnPacket )
     {   
@@ -277,7 +277,7 @@ void loop()
         coilDrive[i].update() ;
     }
 
-#elif defined OCCUPANCY || defined CONTROL_PANEL
+#elif defined OCCUPANCY || defined CONTROLPANEL
     REPEAT_MS( sampleTime )                                                     // 1 input will be debounced at the time
     {
         input[index].debounce() ;

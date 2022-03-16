@@ -33,7 +33,7 @@
 
 #include "../config.h"
 
-#ifdef X_NET
+#ifdef XNET
 
 // #define DEBUG
 

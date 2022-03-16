@@ -55,6 +55,9 @@
  * 
  *****************************************************************************/
 
+#include "../config.h"
+#ifdef LNET
+
 #include <string.h>
 #include <avr/interrupt.h>
 //#include "loconet.h"
@@ -211,4 +214,4 @@ uint8_t getLnMsgSize( volatile lnMsg * Msg )
 {
   return ( ( Msg->sz.command & (uint8_t)0x60 ) == (uint8_t)0x60 ) ? Msg->sz.mesg_size : ( ( Msg->sz.command & (uint8_t)0x60 ) >> (uint8_t)4 ) + 2 ;
 }
-
+#endif
