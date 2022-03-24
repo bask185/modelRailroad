@@ -7,9 +7,9 @@
 /*******  GENERAL IO ********/
 const int   ADDRESS = 0x00 ;                                                    // address in EEPROM for 'myAddress'
 uint16      myAddress ;                                                         // STORED IN EEPROM
-const int   configPin = A5 ;                                                    // in all variants this pin is used to configure address
+const int   configPin = A6 ;                                                    // in all variants this pin is used to configure address may also be A7 perhaps, check board designs
 bool        getAddress ;
-Debounce    configBtn( configPin ) ;
+Debounce    configBtn( 255 ) ;                                                  // analog only
 
 /******* INTERFACE *******/
 #if   defined XNET
@@ -39,7 +39,7 @@ Debounce    configBtn( configPin ) ;
     const int nServos = 4 ;
     const int nAddresses = nServos ;
 
-    const int servPin1 = 3, relPin1 =  7 ,
+    const int servPin1 = 3, relPin1 =  7 ,  // fix pins
               servPin2 = 4, relPin2 =  8 ,
               servPin3 = 5, relPin3 =  9 ,
               servPin4 = 6, relPin4 = 10 ;
@@ -104,32 +104,7 @@ Debounce    configBtn( configPin ) ;
 
 
 
-/********* CONTROL OUTPUTS (interface abstract) ************/
-
-void sendOPC_SW_REQ(int address, byte dir, byte on)
-{
-#ifdef LNET
-    lnMsg SendPacket ;
-    
-    int sw2 = 0x00 ;
-    if (dir) sw2 |= B00100000 ;
-    if (on)  sw2 |= B00010000 ;
-    sw2 |= (address >> 7) & 0x0F ;
-    
-    SendPacket.data[ 0 ] = OPC_SW_REQ ;
-    SendPacket.data[ 1 ] = address & 0x7F ;
-    SendPacket.data[ 2 ] = sw2 ;
-    
-    LocoNet.send( &SendPacket );
-#endif
-}
-
-void setLNTurnout(int address, byte dir)
-{
-    sendOPC_SW_REQ( address - 1, dir, 1 ) ;
-    sendOPC_SW_REQ( address - 1, dir, 0 ) ;
-}
-
+/********* CONTROL OUTPUTS ************/
 
 void storeNewAddress( uint16 _address )
 {
@@ -196,7 +171,33 @@ void notifyDccAccTurnoutOutput ( uint16 Addr, uint8 Direction, uint8 OutputPower
 
 
 
-/********* TRANSMITT FUNCTIONS *********/
+/********* TRANSMITT FUNCTIONS, Xnet and Lnet *********/
+// Lnet
+void sendOPC_SW_REQ(int address, byte dir, byte on)
+{
+#ifdef LNET
+    lnMsg SendPacket ;
+    
+    int sw2 = 0x00 ;
+    if (dir) sw2 |= B00100000 ;
+    if (on)  sw2 |= B00010000 ;
+    sw2 |= (address >> 7) & 0x0F ;
+    
+    SendPacket.data[ 0 ] = OPC_SW_REQ ;
+    SendPacket.data[ 1 ] = address & 0x7F ;
+    SendPacket.data[ 2 ] = sw2 ;
+    
+    LocoNet.send( &SendPacket );
+#endif
+}
+
+void setLNTurnout(int address, byte dir)
+{
+    sendOPC_SW_REQ( address - 1, dir, 1 ) ;
+    sendOPC_SW_REQ( address - 1, dir, 0 ) ;
+}
+
+
 void sendState( uint8 IO, uint8 state )
 {
 #if defined XNET                                                               // if Xnet, send accesory instruction
@@ -216,6 +217,7 @@ void sendState( uint8 IO, uint8 state )
 }
 
 
+/*********** SETUP ***********/
 void setup()
 {
     EEPROM.get( ADDRESS, myAddress ) ;
@@ -240,43 +242,56 @@ void loop()
 {
     static uint8 index = 0 ;
 
-    REPEAT_MS( 50 )
-    {
-        configBtn.debounce() ;
-    } END_REPEAT
-    
-    if( configBtn.getState() == FALLING ) { getAddress = true ; }
-
 
 /******* INTERFACE HANDLING *******/
-#if defined XNET                                                               // Xnet
+#if defined XNET
     Xnet.update() ;
 
-#elif defined LNET                                                             // Lnet
+#elif defined LNET
     LnPacket = LocoNet.receive() ;
     if( LnPacket )
     {   
         LocoNet.processSwitchSensorMessage( LnPacket ) ;
     }
 
-#elif defined DCC                                                               // DCC
+#elif defined DCC
     dcc.process() ;
 
 #endif
     
 /******* ROUND ROBIN TASKS *******/
+
+// debounce config pin
+    REPEAT_MS( 50 )
+    {
+        uint16 sample = analogRead( configPin ) ;
+        if( sample < 500 ) { configBtn.debounce( 0 ) ; }
+        else               { configBtn.debounce( 1 ) ; }
+    } END_REPEAT
+    
+    if( configBtn.getState() == FALLING ) { getAddress = true ; }
+
+// update status led
+    REPEAT_MS( 1000 )
+    {
+        if( getAddress == true ) { digitalWrite( statusLed, !digitalRead( statusLed ) ) ; }
+        else                     { digitalWrite( statusLed, HIGH ) ; }
+    } END_REPEAT
+
+// update servo motors
 #if defined SERVO
     for( int i = 0 ; i < nServos ; i ++ )
     {
         servo[i].sweep() ;
     }
-
+// check when mosfets needs to be turned off
 #elif defined MOSFET
     for( int i = 0 ; i < nCoilDrives ; i ++ )
     {
         coilDrive[i].update() ;
     }
 
+// debounce inputs and transmitt updates
 #elif defined OCCUPANCY || defined CONTROLPANEL
     REPEAT_MS( sampleTime )                                                     // 1 input will be debounced at the time
     {
@@ -291,7 +306,7 @@ void loop()
 
 
 #elif defined SIGNAL
-    // not yet created, unsure if update function will be needed?
+    // not yet created, unsure if update function will be needed? DCC ONLY? IDK how locnet signals is supposed to work
 
 #endif
 }

@@ -1,2 +1,2 @@
-#define DCC
-#define SERVO
+#define LNET
+#define OCCUPANCY
