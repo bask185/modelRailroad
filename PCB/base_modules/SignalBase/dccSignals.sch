@@ -273,10 +273,6 @@ Wire Wire Line
 	3000 5650 3000 5500
 Text Label 2200 4300 2    50   ~ 0
 S1R_IN
-Wire Wire Line
-	7300 2650 7600 2650
-Wire Wire Line
-	7300 1000 7600 1000
 $Comp
 L MCU_Module:Arduino_Nano_v2.x A1
 U 1 1 62322348
@@ -410,30 +406,6 @@ F 3 "" H 9600 3100 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 $Comp
-L power:VCC #PWR0110
-U 1 1 62518E49
-P 7600 2300
-F 0 "#PWR0110" H 7600 2150 50  0001 C CNN
-F 1 "VCC" H 7615 2473 50  0000 C CNN
-F 2 "" H 7600 2300 50  0001 C CNN
-F 3 "" H 7600 2300 50  0001 C CNN
-	1    7600 2300
-	1    0    0    -1  
-$EndComp
-Wire Wire Line
-	7600 2300 7600 2650
-$Comp
-L power:VCC #PWR0111
-U 1 1 62518A5A
-P 7600 900
-F 0 "#PWR0111" H 7600 750 50  0001 C CNN
-F 1 "VCC" H 7615 1073 50  0000 C CNN
-F 2 "" H 7600 900 50  0001 C CNN
-F 3 "" H 7600 900 50  0001 C CNN
-	1    7600 900 
-	1    0    0    -1  
-$EndComp
-$Comp
 L Transistor_Array:ULN2003A U1
 U 1 1 62524260
 P 6900 1400
@@ -444,8 +416,6 @@ F 3 "http://www.ti.com/lit/ds/symlink/uln2003a.pdf" H 7000 1200 50  0001 C CNN
 	1    6900 1400
 	1    0    0    -1  
 $EndComp
-Wire Wire Line
-	7600 1000 7600 900 
 $Comp
 L Transistor_Array:ULN2003A U2
 U 1 1 62536256
@@ -554,26 +524,6 @@ Wire Wire Line
 	2950 2150 3100 2150
 Wire Wire Line
 	2750 2450 2950 2450
-$Comp
-L MCU_Module:Arduino_Nano_v2.x A2
-U 1 1 626EEC29
-P 8450 5400
-F 0 "A2" H 7900 4400 50  0000 C CNN
-F 1 "Arduino_Nano_v2.x" H 7850 4300 50  0000 C CNN
-F 2 "Module:Arduino_Nano" H 8450 5400 50  0001 C CIN
-F 3 "https://www.arduino.cc/en/uploads/Main/ArduinoNanoManual23.pdf" H 8450 5400 50  0001 C CNN
-	1    8450 5400
-	1    0    0    -1  
-$EndComp
-$Comp
-L MCU_Microchip_ATmega:ATmega328-PU U3
-U 1 1 626F37B4
-P 10350 5550
-F 0 "U3" H 9706 5596 50  0000 R CNN
-F 1 "ATmega328-PU" H 9706 5505 50  0000 R CNN
-F 2 "Package_DIP:DIP-28_W7.62mm" H 10350 5550 50  0001 C CIN
-F 3 "http://ww1.microchip.com/downloads/en/DeviceDoc/ATmega328_P%20AVR%20MCU%20with%20picoPower%20Technology%20Data%20Sheet%2040001984A.pdf" H 10350 5550 50  0001 C CNN
-	1    10350 5550
-	1    0    0    -1  
-$EndComp
+NoConn ~ 7300 1000
+NoConn ~ 7300 2650
 $EndSCHEMATC
