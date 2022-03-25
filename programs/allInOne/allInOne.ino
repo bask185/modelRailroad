@@ -3,6 +3,8 @@
 #include "src/debounceClass.h"
 #include <EEPROM.h>
 
+/*************** INITIALIZATION *****************/
+
 
 /*******  GENERAL IO ********/
 const int   ADDRESS = 0x00 ;                                                    // address in EEPROM for 'myAddress'
@@ -78,8 +80,8 @@ Debounce    configBtn( 255 ) ;                                                  
     const int relay[nRelays]   = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, A0, A1, A2, A3, A4 } ;
 
 #elif defined OCCUPANCY || defined CONTROLPANEL                                // both OCCUPANCY detector as switch panel use same inputs
-    const int nAddresses = 0xFF ;
     const int nSensors = 16 ;
+    const int nAddresses = nSensors ;
     const int sensorPin[nSensors] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, A0, A1, A2, A3, A4 } ;
     Debounce input[] =
     {
@@ -95,16 +97,73 @@ Debounce    configBtn( 255 ) ;                                                  
         #endif
 
 #elif defined SIGNAL
-
+#include "src/signal.h"
+const int nSignals = 4 ;
+const int nAddresses = nSignals ;
+const int signalPins[ nSignals * 3 ] = 
+{  3,  4,  5, 
+   6,  7,  8, 
+  13, A5, 12, 
+   9, 10, 11
+} ;
+Signal signal[] =
+{
+    Signal( signalPins[ 0], signalPins[ 1], signalPins[ 2] ),
+    Signal( signalPins[ 3], signalPins[ 4], signalPins[ 5] ),
+    Signal( signalPins[ 6], signalPins[ 7], signalPins[ 8] ),
+    Signal( signalPins[ 9], signalPins[10], signalPins[11] )
+} ;
 
 #else
 #error NO MODULE DEFINED, CANNOT COMPILE
 #endif
 
+/*********** SETUP ***********/
+void setup()
+{
+// LOAD ADDRESS FROM EEPROM
+    EEPROM.get( ADDRESS, myAddress ) ;
+    if( myAddress == 0xFFFF )
+    {
+        myAddress = 1 ;
+        EEPROM.put( ADDRESS, myAddress ) ;
+    }
+
+// INITIALIZE INTERFACE
+#if defined XNET
+    Xnet.setup( Loco128 ,RS485DIR ) ;
+
+#elif defined LNET
+    LocoNet.init(LNtxPin);
+
+#elif defined DCC
+    //dcc.init( /* add paramterts */ ) ;
+#endif
+
+// INITIALIZE MODULE
+#if defined SERVO
+    for( int i = 0 ; i < nSignals ; i ++ )
+    {
+        servo[i].begin() ;
+    }
+
+#elif defined MOSFET
+    for( int i = 0 ; i < nCoilDrives ; i ++ )
+    {
+        coilDrive[i].begin() ;
+    }
+
+#elif defined SIGNAL
+    for( int i = 0 ; i < nSignals ; i ++ )
+    {
+        signal[i].begin() ;
+    }
+
+#endif
+}
 
 
-
-/********* CONTROL OUTPUTS ************/
+/********* OUTPUTS ************/
 
 void storeNewAddress( uint16 _address )
 {
@@ -128,10 +187,24 @@ void setOutput( uint16 Address, uint8 state )
     #elif defined MOSFET                                                        // set one of 2 coils, and turn it off later.
         coilDrive[ID].setState( state ) ;
 
+    #elif defined SIGNAL
+        if( state )                                                             // if 'detector' is made.. TODO, draw me, and fixme
+        {
+              signal[ID].setState( RED ) ;
+            signal[ID-1].setState( YELLOW)
+        }
+        else
+        {
+            signal[ID].setState( state ) ; 
+        }
+        signal[ID].setState( state ) ;                                          // TODO for signals need to use address to calculate GREEN, YELLOW OR RED
+        signal[ID].setState( state ) ;                                          // TODO 2 signals may be set if one feedback section changes state
+
+
+        signal[ID].setState( state ) ;                                          // TODO depending on combined addresses or NOT, this may become different
     #endif
     }
 }
-
 
 
 
@@ -150,7 +223,7 @@ void notifyXNetTrnt( uint16 Address, uint8 data )
 }
 
 // Lnet
-void notifySwitchRequest( uint16_t Address, uint8_t Output, uint8_t Direction ) 
+void notifySwitchRequest( uint16 Address, uint8 Output, uint8 Direction ) 
 {
     if( Output == 1 )
     {
@@ -160,7 +233,7 @@ void notifySwitchRequest( uint16_t Address, uint8_t Output, uint8_t Direction )
 }
 
 // DCC
-void notifyDccAccTurnoutOutput ( uint16 Addr, uint8 Direction, uint8 OutputPower ) // NOTE MAKE WRAPPER FUNCTION TO BE CALLED FROM ALL CALLBACKS
+void notifyDccAccTurnoutOutput ( uint16 Addr, uint8 Direction, uint8 OutputPower )
 {
     if( OutputPower == 1 )
     {
@@ -217,25 +290,7 @@ void sendState( uint8 IO, uint8 state )
 }
 
 
-/*********** SETUP ***********/
-void setup()
-{
-    EEPROM.get( ADDRESS, myAddress ) ;
-    if( myAddress == 0xFFFF )
-    {
-        myAddress = 1 ;
-        EEPROM.put( ADDRESS, myAddress ) ;
-    }
 
-#if defined XNET
-    Xnet.setup( Loco128 ,RS485DIR ) ;
-#elif defined LNET
-    LocoNet.init(LNtxPin);
-#elif defined DCC
-    //dcc.init( /* add paramterts */ ) ;
-#endif
-
-}
 
 /********* MAIN LOOP **********/
 void loop()
@@ -278,11 +333,11 @@ void loop()
         else                     { digitalWrite( statusLed, HIGH ) ; }
     } END_REPEAT
 
-// update servo motors
+// update servo motors and frog relais
 #if defined SERVO
     for( int i = 0 ; i < nServos ; i ++ )
     {
-        servo[i].sweep() ;
+        servo[i].update() ;
     }
 // check when mosfets needs to be turned off
 #elif defined MOSFET
@@ -305,8 +360,8 @@ void loop()
     if( state ==  RISING ) sendState( index, 0 ) ;                              // or take control of a point
 
 
-#elif defined SIGNAL
-    // not yet created, unsure if update function will be needed? DCC ONLY? IDK how locnet signals is supposed to work
+#elif defined SIGNAL                                                            // signals have (not yet) need for an update function. Perhaps on one day I will add fading or something.
+    
 
 #endif
 }

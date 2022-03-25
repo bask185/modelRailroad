@@ -7,6 +7,12 @@ CoilDrive::CoilDrive( uint8 _pinA, uint8 _pinB, uint32 _switchTime )
     switchTime = _switchTime ;
 }
 
+void CoilDrive::begin()
+{
+    pinMode( pinA, OUTPUT ) ;
+    pinMode( pinB, OUTPUT ) ;
+}
+
 void CoilDrive::setState( uint8 _state )
 {
     prevTime = millis() ;

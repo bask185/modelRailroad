@@ -57,7 +57,7 @@ void ServoSweep::setState( uint8_t _state ) {
 //     servo.detach(  ) ;
 // }
 
-uint8_t ServoSweep::sweep ( ) {
+uint8_t ServoSweep::update ( ) {
     if( millis() > timeToRun ) {
         timeToRun = millis() + servoSpeed ;
 

@@ -1,2 +1,2 @@
 #define LNET
-#define OCCUPANCY
+#define SIGNAL
