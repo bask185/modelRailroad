@@ -12,6 +12,7 @@ uint16      myAddress ;                                                         
 const int   configPin = A6 ;                                                    // in all variants this pin is used to configure address may also be A7 perhaps, check board designs
 bool        getAddress ;
 Debounce    configBtn( 255 ) ;                                                  // analog only
+const int   statusLed ;
 
 /******* INTERFACE *******/
 #if   defined XNET
@@ -142,7 +143,7 @@ void setup()
 
 // INITIALIZE MODULE
 #if defined SERVO
-    for( int i = 0 ; i < nSignals ; i ++ )
+    for( int i = 0 ; i < nServos ; i ++ )
     {
         servo[i].begin() ;
     }
@@ -191,17 +192,19 @@ void setOutput( uint16 Address, uint8 state )
         if( state )                                                             // if 'detector' is made.. TODO, draw me, and fixme
         {
               signal[ID].setState( RED ) ;
-            signal[ID-1].setState( YELLOW)
+            signal[ID-1].setState( YELLOW) ;
         }
         else
         {
             signal[ID].setState( state ) ; 
         }
-        signal[ID].setState( state ) ;                                          // TODO for signals need to use address to calculate GREEN, YELLOW OR RED
-        signal[ID].setState( state ) ;                                          // TODO 2 signals may be set if one feedback section changes state
+        //signal[ID].setState( state ) ;                                          // TODO for signals need to use address to calculate GREEN, YELLOW OR RED
+        //signal[ID].setState( state ) ;                                          // TODO 2 signals may be set if one feedback section changes state
 
 
         signal[ID].setState( state ) ;                                          // TODO depending on combined addresses or NOT, this may become different
+    #else
+    
     #endif
     }
 }

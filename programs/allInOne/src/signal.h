@@ -8,9 +8,9 @@ const int    RED = 3 ;
 class Signal
 {
 public:
-    signal( uint8 _green, uint8 _yellow, uint8 _red ) ;
-    setState( uint8 _state )
-    begin() ;
+    Signal( uint8 _green, uint8 _yellow, uint8 _red ) ;
+    void setState( uint8 _state ) ;
+    void begin() ;
 
 private:
     uint8 greenPin ;
