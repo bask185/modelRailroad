@@ -1,2 +1,3 @@
-#define DCC
-#define RELAY
+#define LNET
+//#define CONTROLPANEL
+#define SIGNAL

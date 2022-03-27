@@ -1,14 +1,22 @@
 #include "Signal.h"
 
-Signal::signal( uint8 _green, uint8 _yellow, uint8 _red )
+Signal::Signal( uint8 _green, uint8 _yellow, uint8 _red )
 {
     greenPin = _green ;
     yellowPin = _yellow ;
-    redPin = _red
+    redPin = _red ;
+}
+
+void Signal::begin()
+{
+    digitalWrite(  greenPin, OUTPUT ) ;
+    digitalWrite( yellowPin, OUTPUT ) ;
+    digitalWrite(    redPin, OUTPUT ) ;
 }
 
 void Signal::setState( uint8 _state )
 {
+    uint8 greenState, yellowState, redState ;
     #define setStates(x,y,z) greenState = x ; yellowState = y ; redState = z ;
     switch( _state )
     {
