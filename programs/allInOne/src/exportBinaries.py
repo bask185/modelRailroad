@@ -4,8 +4,8 @@ import os
 import shutil
 
 #               Xnet    Lnet    DCC
-# controlPanel
-# ledDriver 
+# controlPanel   O      O       NA 
+# ledDriver     
 # mosfet
 # servo
 # shuttle
@@ -22,14 +22,14 @@ import shutil
 # #define RELAY
 # #define OCCUPANCY
 # #define SIGNAL
-#define CONTROLPANEL
+# define CONTROLPANEL
 # #define LED_DRIVER
 # #define SHUTTLE
 
 #define DEFAULT_DCC_ADDRESS 1
 
 interfaces = ["LNET", "XNET", "DCC"] 
-bases = ["CONTROLPANEL", "MOSFET", "SERVO", "OCCUPANCY"]
+bases = ["CONTROLPANEL", "MOSFET", "SERVO", "OCCUPANCY", "RELAY"]
 
 for interface in interfaces :
 

@@ -7,7 +7,7 @@
 /*******  GENERAL IO ********/
 const int   ADDRESS = 0x00 ;                                                    // address in EEPROM for 'myAddress'
 uint16      myAddress ;                                                         // STORED IN EEPROM
-const int   configPin = A5 ;                                                    // in all variants this pin is used to configure address
+const int   configPin = A6 ;                                                    // in all variants this pin is used to configure address
 bool        getAddress ;
 Debounce    configBtn( configPin ) ;
 

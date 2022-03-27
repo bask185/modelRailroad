@@ -1,4 +1,8 @@
-echo "uploading"
-"avrdude" "avrdude.conf" -v -V -p atmega328p  -"PCOM4" -b115200 -D "-Uflash:w:DCC_MOSFET.hex:i"
+echo "Welcom"
+set /p interface=Which interface are you using (DCC XNET LNET)?/n
+set /p baseType=Which base shield are you using (MOSFET, SERVO, OCCUPANCY, CONTROLPANEL, RELAY)?/n
+set /p comNumber=Which comport is your arduino connected to?\n
 
-: "C:\Users\sknippels\AppData\Local\Arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17/bin/avrdude" "-CC:\Users\sknippels\AppData\Local\Arduino15\packages\arduino\tools\avrdude\6.3.0-arduino17/etc/avrdude.conf" -v -V -patmega328p -carduino "-PCOM4" -b115200 -D "-Uflash:w:build\arduino.avr.nano/allInOne.ino.hex:i"
+echo %interface%_%baseType% on %comNumber%
+
+avrdude -C avrdude.conf -p atmega328p -c arduino  -P %comNumber% -b 57600 -D -U flash:w:%interface%_%baseType%.hex:i

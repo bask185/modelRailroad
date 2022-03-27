@@ -269,7 +269,6 @@ Wire Wire Line
 	5100 950  5450 950 
 Wire Wire Line
 	3950 950  3650 950 
-Connection ~ 3250 950 
 Connection ~ 3650 950 
 Wire Wire Line
 	3650 950  3250 950 
@@ -553,39 +552,16 @@ NoConn ~ 6800 4000
 NoConn ~ 6800 4100
 NoConn ~ 6800 4200
 $Comp
-L Device:D_Bridge_+-AA D1
-U 1 1 6233790E
-P 2600 1250
-F 0 "D1" V 2400 1100 50  0000 R CNN
-F 1 "D" V 2300 1100 50  0000 R CNN
-F 2 "Diode_THT:Diode_Bridge_DIP-4_W7.62mm_P5.08mm" H 2600 1250 50  0001 C CNN
-F 3 "~" H 2600 1250 50  0001 C CNN
-	1    2600 1250
-	0    -1   -1   0   
-$EndComp
-Wire Wire Line
-	2600 950  3250 950 
-Wire Wire Line
-	2600 1550 2600 1650
-$Comp
 L power:GND #PWR0120
 U 1 1 6233F7BB
-P 2600 1650
-F 0 "#PWR0120" H 2600 1400 50  0001 C CNN
-F 1 "GND" H 2605 1477 50  0000 C CNN
-F 2 "" H 2600 1650 50  0001 C CNN
-F 3 "" H 2600 1650 50  0001 C CNN
-	1    2600 1650
+P 2950 1350
+F 0 "#PWR0120" H 2950 1100 50  0001 C CNN
+F 1 "GND" H 2955 1177 50  0000 C CNN
+F 2 "" H 2950 1350 50  0001 C CNN
+F 3 "" H 2950 1350 50  0001 C CNN
+	1    2950 1350
 	1    0    0    -1  
 $EndComp
-Text Label 3150 1250 2    50   ~ 0
-DCC+
-Text Label 2050 1250 0    50   ~ 0
-DCC-
-Wire Wire Line
-	2050 1250 2300 1250
-Wire Wire Line
-	2900 1250 3150 1250
 Wire Wire Line
 	7750 3400 7600 3400
 $Comp
@@ -613,24 +589,24 @@ Wire Wire Line
 $Comp
 L Connector:Screw_Terminal_01x02 J8
 U 1 1 623524A9
-P 9350 1350
-F 0 "J8" V 9314 1162 50  0000 R CNN
-F 1 "frog" V 9223 1162 50  0000 R CNN
-F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal" H 9350 1350 50  0001 C CNN
-F 3 "~" H 9350 1350 50  0001 C CNN
-	1    9350 1350
-	1    0    0    -1  
+P 9350 1450
+F 0 "J8" H 9268 1125 50  0000 C CNN
+F 1 "frog" H 9268 1216 50  0000 C CNN
+F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal" H 9350 1450 50  0001 C CNN
+F 3 "~" H 9350 1450 50  0001 C CNN
+	1    9350 1450
+	1    0    0    1   
 $EndComp
 $Comp
 L Connector:Screw_Terminal_01x02 J6
 U 1 1 62357026
-P 8150 1450
-F 0 "J6" V 8114 1262 50  0000 R CNN
-F 1 "frog" V 8023 1262 50  0000 R CNN
-F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal" H 8150 1450 50  0001 C CNN
-F 3 "~" H 8150 1450 50  0001 C CNN
-	1    8150 1450
-	-1   0    0    1   
+P 8150 1350
+F 0 "J6" H 8068 1567 50  0000 C CNN
+F 1 "frog" H 8068 1476 50  0000 C CNN
+F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal" H 8150 1350 50  0001 C CNN
+F 3 "~" H 8150 1350 50  0001 C CNN
+	1    8150 1350
+	-1   0    0    -1  
 $EndComp
 Wire Wire Line
 	8350 1450 8650 1450
@@ -651,13 +627,13 @@ frog4
 $Comp
 L Connector:Screw_Terminal_01x02 J7
 U 1 1 623619B3
-P 8800 650
-F 0 "J7" V 8764 730 50  0000 L CNN
-F 1 "DCC" V 8673 730 50  0000 L CNN
-F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal" H 8800 650 50  0001 C CNN
-F 3 "~" H 8800 650 50  0001 C CNN
-	1    8800 650 
-	0    1    -1   0   
+P 8700 650
+F 0 "J7" V 8664 462 50  0000 R CNN
+F 1 "DCC" V 8573 462 50  0000 R CNN
+F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal" H 8700 650 50  0001 C CNN
+F 3 "~" H 8700 650 50  0001 C CNN
+	1    8700 650 
+	0    -1   -1   0   
 $EndComp
 Text Label 8800 1100 1    50   ~ 0
 DCC+
@@ -683,12 +659,12 @@ $Comp
 L Connector:Screw_Terminal_01x05 J5
 U 1 1 62381D20
 P 7600 650
-F 0 "J5" V 7472 930 50  0000 L CNN
-F 1 "Btn" V 7563 930 50  0000 L CNN
+F 0 "J5" V 7564 930 50  0000 L CNN
+F 1 "Btn" V 7473 930 50  0000 L CNN
 F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-5-5.08_1x05_P5.08mm_Horizontal" H 7600 650 50  0001 C CNN
 F 3 "~" H 7600 650 50  0001 C CNN
 	1    7600 650 
-	0    -1   -1   0   
+	0    1    -1   0   
 $EndComp
 Wire Wire Line
 	7800 850  7800 1100
@@ -763,10 +739,6 @@ Wire Wire Line
 	3050 4950 3200 4950
 Text Label 3200 4950 2    50   ~ 0
 conf
-Text Label 4250 3850 0    50   ~ 0
-conf
-Wire Wire Line
-	4250 3850 4550 3850
 $Comp
 L power:GND #PWR0125
 U 1 1 623ACE63
@@ -877,7 +849,6 @@ pot1
 Wire Wire Line
 	5550 3750 5800 3750
 NoConn ~ 5550 4050
-NoConn ~ 5550 3950
 Text Label 5800 3850 2    50   ~ 0
 pot2
 Wire Wire Line
@@ -986,4 +957,27 @@ F 3 "http://omronfs.omron.com/en_US/ecb/products/pdf/en-g5v_1.pdf" H 10500 5450 
 	1    10500 5450
 	0    1    1    0   
 $EndComp
+$Comp
+L Connector:Screw_Terminal_01x02 J9
+U 1 1 625182A9
+P 2600 950
+F 0 "J9" H 2518 1167 50  0000 C CNN
+F 1 "pow" H 2518 1076 50  0000 C CNN
+F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-2-5.08_1x02_P5.08mm_Horizontal" H 2600 950 50  0001 C CNN
+F 3 "~" H 2600 950 50  0001 C CNN
+	1    2600 950 
+	-1   0    0    -1  
+$EndComp
+Wire Wire Line
+	3250 950  2800 950 
+Connection ~ 3250 950 
+Wire Wire Line
+	2950 1050 2800 1050
+Wire Wire Line
+	2950 1050 2950 1350
+Text Label 5800 3950 2    50   ~ 0
+conf
+Wire Wire Line
+	5550 3950 5800 3950
+NoConn ~ 4550 3850
 $EndSCHEMATC
