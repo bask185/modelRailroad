@@ -97,7 +97,7 @@ const int   statusLed ;
         uint16 sampleTime = 3 ;
         #endif
 
-#elif defined SIGNAL
+#elif defined SIGNALS
 #include "src/signal.h"
 const int nSignals = 4 ;
 const int nAddresses = nSignals ;
@@ -148,16 +148,16 @@ void setup()
         servo[i].begin() ;
     }
 
+#elif defined SIGNALS
+    for( int i = 0 ; i < nSignals ; i ++ )
+    {
+        signal[i].begin() ;
+    }
+
 #elif defined MOSFET
     for( int i = 0 ; i < nCoilDrives ; i ++ )
     {
         coilDrive[i].begin() ;
-    }
-
-#elif defined SIGNAL
-    for( int i = 0 ; i < nSignals ; i ++ )
-    {
-        signal[i].begin() ;
     }
 
 #endif
@@ -188,7 +188,7 @@ void setOutput( uint16 Address, uint8 state )
     #elif defined MOSFET                                                        // set one of 2 coils, and turn it off later.
         coilDrive[ID].setState( state ) ;
 
-    #elif defined SIGNAL
+    #elif defined SIGNALS
         if( state )                                                             // if 'detector' is made.. TODO, draw me, and fixme
         {
               signal[ID].setState( RED ) ;
@@ -202,9 +202,7 @@ void setOutput( uint16 Address, uint8 state )
         //signal[ID].setState( state ) ;                                          // TODO 2 signals may be set if one feedback section changes state
 
 
-        signal[ID].setState( state ) ;                                          // TODO depending on combined addresses or NOT, this may become different
-    #else
-    
+        signal[ID].setState( state ) ;                                          // TODO depending on combined addresses or NOT, this may become different    
     #endif
     }
 }
@@ -363,7 +361,7 @@ void loop()
     if( state ==  RISING ) sendState( index, 0 ) ;                              // or take control of a point
 
 
-#elif defined SIGNAL                                                            // signals have (not yet) need for an update function. Perhaps on one day I will add fading or something.
+//#elif defined SIGNALS                                                            // signals have (not yet) need for an update function. Perhaps on one day I will add fading or something.
     
 
 #endif

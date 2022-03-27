@@ -1,3 +1,2 @@
-#define LNET
-//#define CONTROLPANEL
-#define SIGNAL
+#define DCC
+#define SIGNALS

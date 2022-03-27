@@ -29,7 +29,7 @@ import shutil
 #define DEFAULT_DCC_ADDRESS 1
 
 interfaces = ["LNET", "XNET", "DCC"] 
-bases = ["CONTROLPANEL", "MOSFET", "SERVO", "OCCUPANCY", "RELAY", "SIGNAL"]
+bases = ["CONTROLPANEL", "MOSFET", "SERVO", "OCCUPANCY", "RELAY", "SIGNALS"]
 
 for interface in interfaces :
 
@@ -51,7 +51,7 @@ for interface in interfaces :
         os.system("python src/build.py")
 
         oldDir = 'build/arduino.avr.nano/allInOne.ino.hex'
-        newDir = 'binaries/' + interface + '_' + base + '.hex' 
+        newDir = '../../releases/binaries/' + interface + '_' + base + '.hex' 
         print( oldDir )
         print( newDir )
 
