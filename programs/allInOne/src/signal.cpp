@@ -1,4 +1,4 @@
-#include "Signal.h"
+#include "signal.h"
 
 Signal::Signal( uint8 _green, uint8 _yellow, uint8 _red )
 {
@@ -14,15 +14,15 @@ void Signal::begin()
     digitalWrite(    redPin, OUTPUT ) ;
 }
 
-void setSensor1( uint8 _state )
+void Signal::setSensor1( uint8 _state )
 {
     sensor1 = _state ;
     update() ;
 }
 
-void setSensor2( uint8 _state )
+void Signal::setSensor2( uint8 _state )
 {
-    sensor2 = _state 
+    sensor2 = _state ;
     update() ;
 }
 
