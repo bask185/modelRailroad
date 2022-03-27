@@ -7,7 +7,7 @@ public:
     CoilDrive( uint8_t, uint8_t, uint32 ) ;
     void setState( uint8_t );
     void update() ;
-    void init() ;
+    void begin() ;
 
 private:
     uint32  switchTime ;

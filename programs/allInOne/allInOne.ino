@@ -3,13 +3,15 @@
 #include "src/debounceClass.h"
 #include <EEPROM.h>
 
+/*************** INITIALIZATION *****************/
+
 
 /*******  GENERAL IO ********/
 const int   ADDRESS = 0x00 ;                                                    // address in EEPROM for 'myAddress'
 uint16      myAddress ;                                                         // STORED IN EEPROM
-const int   configPin = A6 ;                                                    // in all variants this pin is used to configure address
+const int   configPin = A6 ;                                                    // in all variants this pin is used to configure address may also be A7 perhaps, check board designs
 bool        getAddress ;
-Debounce    configBtn( configPin ) ;
+Debounce    configBtn( 255 ) ;                                                  // analog only
 
 /******* INTERFACE *******/
 #if   defined XNET
@@ -39,7 +41,7 @@ Debounce    configBtn( configPin ) ;
     const int nServos = 4 ;
     const int nAddresses = nServos ;
 
-    const int servPin1 = 3, relPin1 =  7 ,
+    const int servPin1 = 3, relPin1 =  7 ,  // fix pins
               servPin2 = 4, relPin2 =  8 ,
               servPin3 = 5, relPin3 =  9 ,
               servPin4 = 6, relPin4 = 10 ;
@@ -78,8 +80,8 @@ Debounce    configBtn( configPin ) ;
     const int relay[nRelays]   = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, A0, A1, A2, A3, A4 } ;
 
 #elif defined OCCUPANCY || defined CONTROLPANEL                                // both OCCUPANCY detector as switch panel use same inputs
-    const int nAddresses = 0xFF ;
     const int nSensors = 16 ;
+    const int nAddresses = nSensors ;
     const int sensorPin[nSensors] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, A0, A1, A2, A3, A4 } ;
     Debounce input[] =
     {
@@ -95,17 +97,155 @@ Debounce    configBtn( configPin ) ;
         #endif
 
 #elif defined SIGNAL
-
+#include "src/signal.h"
+const int nSignals = 4 ;
+const int nAddresses = nSignals ;
+const int signalPins[ nSignals * 3 ] = 
+{  3,  4,  5, 
+   6,  7,  8, 
+  13, A5, 12, 
+   9, 10, 11
+} ;
+Signal signal[] =
+{
+    Signal( signalPins[ 0], signalPins[ 1], signalPins[ 2] ),
+    Signal( signalPins[ 3], signalPins[ 4], signalPins[ 5] ),
+    Signal( signalPins[ 6], signalPins[ 7], signalPins[ 8] ),
+    Signal( signalPins[ 9], signalPins[10], signalPins[11] )
+} ;
 
 #else
 #error NO MODULE DEFINED, CANNOT COMPILE
 #endif
 
+/*********** SETUP ***********/
+void setup()
+{
+// LOAD ADDRESS FROM EEPROM
+    EEPROM.get( ADDRESS, myAddress ) ;
+    if( myAddress == 0xFFFF )
+    {
+        myAddress = 1 ;
+        EEPROM.put( ADDRESS, myAddress ) ;
+    }
+
+// INITIALIZE INTERFACE
+#if defined XNET
+    Xnet.setup( Loco128 ,RS485DIR ) ;
+
+#elif defined LNET
+    LocoNet.init(LNtxPin);
+
+#elif defined DCC
+    //dcc.init( /* add paramterts */ ) ;
+#endif
+
+// INITIALIZE MODULE
+#if defined SERVO
+    for( int i = 0 ; i < nSignals ; i ++ )
+    {
+        servo[i].begin() ;
+    }
+
+#elif defined MOSFET
+    for( int i = 0 ; i < nCoilDrives ; i ++ )
+    {
+        coilDrive[i].begin() ;
+    }
+
+#elif defined SIGNAL
+    for( int i = 0 ; i < nSignals ; i ++ )
+    {
+        signal[i].begin() ;
+    }
+
+#endif
+}
+
+
+/********* OUTPUTS ************/
+
+void storeNewAddress( uint16 _address )
+{
+    getAddress = false ;
+    myAddress = _address ;
+    EEPROM.put( ADDRESS, myAddress ) ;
+}
+
+void setOutput( uint16 Address, uint8 state )
+{
+    if( Address >= myAddress && Address < (myAddress + nAddresses ) )           // if valid address for this module..
+    {
+        uint8 ID = Address - myAddress ;                                        // get ID
+
+    #if defined RELAY                       
+        digitalWrite( relay[ID], state ) ;                                      // directly set relay pin
+
+    #elif defined SERVO                                                         // set servoSweep state
+        servo[ID].setState( state ) ;
+
+    #elif defined MOSFET                                                        // set one of 2 coils, and turn it off later.
+        coilDrive[ID].setState( state ) ;
+
+    #elif defined SIGNAL
+        if( state )                                                             // if 'detector' is made.. TODO, draw me, and fixme
+        {
+              signal[ID].setState( RED ) ;
+            signal[ID-1].setState( YELLOW)
+        }
+        else
+        {
+            signal[ID].setState( state ) ; 
+        }
+        signal[ID].setState( state ) ;                                          // TODO for signals need to use address to calculate GREEN, YELLOW OR RED
+        signal[ID].setState( state ) ;                                          // TODO 2 signals may be set if one feedback section changes state
+
+
+        signal[ID].setState( state ) ;                                          // TODO depending on combined addresses or NOT, this may become different
+    #endif
+    }
+}
 
 
 
-/********* CONTROL OUTPUTS (interface abstract) ************/
 
+
+
+/********* CALL BACK FUNCTIONS *********/
+// Xnet
+void notifyXNetTrnt( uint16 Address, uint8 data )
+{
+    if( bitRead( data, 3 ) == 1 )
+    {
+        if( getAddress ) storeNewAddress( Address ) ;
+        else             setOutput( Address, data & 1 ) ;
+    }
+}
+
+// Lnet
+void notifySwitchRequest( uint16 Address, uint8 Output, uint8 Direction ) 
+{
+    if( Output == 1 )
+    {
+        if( getAddress ) storeNewAddress( Address ) ;
+        else             setOutput( Address, Direction ) ;
+    }
+}
+
+// DCC
+void notifyDccAccTurnoutOutput ( uint16 Addr, uint8 Direction, uint8 OutputPower )
+{
+    if( OutputPower == 1 )
+    {
+        if( getAddress ) storeNewAddress( Addr ) ;
+        else             setOutput( Addr, Direction ) ;
+    }
+}
+
+
+
+/********* TRANSMITT FUNCTIONS, Xnet and Lnet *********/
+// Lnet
 void sendOPC_SW_REQ(int address, byte dir, byte on)
 {
 #ifdef LNET
@@ -131,72 +271,6 @@ void setLNTurnout(int address, byte dir)
 }
 
 
-void storeNewAddress( uint16 _address )
-{
-    getAddress = false ;
-    myAddress = _address ;
-    EEPROM.put( ADDRESS, myAddress ) ;
-}
-
-void setOutput( uint16 Address, uint8 state )
-{
-    if( Address >= myAddress && Address < (myAddress + nAddresses ) )           // if valid address for this module..
-    {
-        uint8 ID = Address - myAddress ;                                        // get ID
-
-    #if defined RELAY                       
-        digitalWrite( relay[ID], state ) ;                                      // directly set relay pin
-
-    #elif defined SERVO                                                         // set servoSweep state
-        servo[ID].setState( state ) ;
-
-    #elif defined MOSFET                                                        // set one of 2 coils, and turn it off later.
-        coilDrive[ID].setState( state ) ;
-
-    #endif
-    }
-}
-
-
-
-
-
-
-
-/********* CALL BACK FUNCTIONS *********/
-// Xnet
-void notifyXNetTrnt( uint16 Address, uint8 data )
-{
-    if( bitRead( data, 3 ) == 1 )
-    {
-        if( getAddress ) storeNewAddress( Address ) ;
-        else             setOutput( Address, data & 1 ) ;
-    }
-}
-
-// Lnet
-void notifySwitchRequest( uint16_t Address, uint8_t Output, uint8_t Direction ) 
-{
-    if( Output == 1 )
-    {
-        if( getAddress ) storeNewAddress( Address ) ;
-        else             setOutput( Address, Direction ) ;
-    }
-}
-
-// DCC
-void notifyDccAccTurnoutOutput ( uint16 Addr, uint8 Direction, uint8 OutputPower ) // NOTE MAKE WRAPPER FUNCTION TO BE CALLED FROM ALL CALLBACKS
-{
-    if( OutputPower == 1 )
-    {
-        if( getAddress ) storeNewAddress( Addr ) ;
-        else             setOutput( Addr, Direction ) ;
-    }
-}
-
-
-
-/********* TRANSMITT FUNCTIONS *********/
 void sendState( uint8 IO, uint8 state )
 {
 #if defined XNET                                                               // if Xnet, send accesory instruction
@@ -216,67 +290,63 @@ void sendState( uint8 IO, uint8 state )
 }
 
 
-void setup()
-{
-    EEPROM.get( ADDRESS, myAddress ) ;
-    if( myAddress == 0xFFFF )
-    {
-        myAddress = 1 ;
-        EEPROM.put( ADDRESS, myAddress ) ;
-    }
 
-#if defined XNET
-    Xnet.setup( Loco128 ,RS485DIR ) ;
-#elif defined LNET
-    LocoNet.init(LNtxPin);
-#elif defined DCC
-    //dcc.init( /* add paramterts */ ) ;
-#endif
-
-}
 
 /********* MAIN LOOP **********/
 void loop()
 {
     static uint8 index = 0 ;
 
-    REPEAT_MS( 50 )
-    {
-        configBtn.debounce() ;
-    } END_REPEAT
-    
-    if( configBtn.getState() == FALLING ) { getAddress = true ; }
-
 
 /******* INTERFACE HANDLING *******/
-#if defined XNET                                                               // Xnet
+#if defined XNET
     Xnet.update() ;
 
-#elif defined LNET                                                             // Lnet
+#elif defined LNET
     LnPacket = LocoNet.receive() ;
     if( LnPacket )
     {   
         LocoNet.processSwitchSensorMessage( LnPacket ) ;
     }
 
-#elif defined DCC                                                               // DCC
+#elif defined DCC
     dcc.process() ;
 
 #endif
     
 /******* ROUND ROBIN TASKS *******/
+
+// debounce config pin
+    REPEAT_MS( 50 )
+    {
+        uint16 sample = analogRead( configPin ) ;
+        if( sample < 500 ) { configBtn.debounce( 0 ) ; }
+        else               { configBtn.debounce( 1 ) ; }
+    } END_REPEAT
+    
+    if( configBtn.getState() == FALLING ) { getAddress = true ; }
+
+// update status led
+    REPEAT_MS( 1000 )
+    {
+        if( getAddress == true ) { digitalWrite( statusLed, !digitalRead( statusLed ) ) ; }
+        else                     { digitalWrite( statusLed, HIGH ) ; }
+    } END_REPEAT
+
+// update servo motors and frog relais
 #if defined SERVO
     for( int i = 0 ; i < nServos ; i ++ )
     {
-        servo[i].sweep() ;
+        servo[i].update() ;
     }
-
+// check when mosfets needs to be turned off
 #elif defined MOSFET
     for( int i = 0 ; i < nCoilDrives ; i ++ )
     {
         coilDrive[i].update() ;
     }
 
+// debounce inputs and transmitt updates
 #elif defined OCCUPANCY || defined CONTROLPANEL
     REPEAT_MS( sampleTime )                                                     // 1 input will be debounced at the time
     {
@@ -290,8 +360,8 @@ void loop()
     if( state ==  RISING ) sendState( index, 0 ) ;                              // or take control of a point
 
 
-#elif defined SIGNAL
-    // not yet created, unsure if update function will be needed?
+#elif defined SIGNAL                                                            // signals have (not yet) need for an update function. Perhaps on one day I will add fading or something.
+    
 
 #endif
 }

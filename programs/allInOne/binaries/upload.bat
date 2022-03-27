@@ -1,7 +1,5 @@
-echo "Welcom"
-set /p interface=Which interface are you using (DCC XNET LNET)?/n
-set /p baseType=Which base shield are you using (MOSFET, SERVO, OCCUPANCY, CONTROLPANEL, RELAY)?/n
-set /p comNumber=Which comport is your arduino connected to?\n
+echo "uploading"
+avrdude avrdude.conf -v -V -p atmega328p -c arduino -P COM4 -b 115200 -D -U flash:w:DCC_MOSFET.hex:i
 
 echo %interface%_%baseType% on %comNumber%
 

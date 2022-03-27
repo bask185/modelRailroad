@@ -6,7 +6,7 @@ class ServoSweep {
 public:
     ServoSweep( uint8_t _servoPin, uint8_t _min, uint8_t _max, uint8_t _speed, uint8_t _turnOff  ) ;        // constructor 1
     ServoSweep( uint8_t _servoPin, uint8_t _min, uint8_t _max, uint8_t _speed, uint8_t _turnOff, uint8_t _relayPin ) ;  // constructor 2
-    uint8_t sweep( );
+    uint8_t update( );
     void setState( uint8_t _state );
     // void turnOn() ;
     // void turnOff() ;
