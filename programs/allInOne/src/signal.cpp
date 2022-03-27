@@ -14,17 +14,29 @@ void Signal::begin()
     digitalWrite(    redPin, OUTPUT ) ;
 }
 
-void Signal::setState( uint8 _state )
+void setSensor1( uint8 _state )
+{
+    sensor1 = _state ;
+    update() ;
+}
+
+void setSensor2( uint8 _state )
+{
+    sensor2 = _state 
+    update() ;
+}
+
+void Signal::update()
 {
     uint8 greenState, yellowState, redState ;
-    #define setStates(x,y,z) greenState = x ; yellowState = y ; redState = z ;
-    switch( _state )
-    {
-        case GREEN :   setStates( HIGH,  LOW,  LOW ) ; break ;
-        case YELLOW :  setStates(  LOW, HIGH,  LOW ) ; break ; 
-        case RED :     setStates(  LOW,  LOW, HIGH ) ; break ;
+
+  #define setStates(x,y,z) greenState = x ; yellowState = y ; redState = z ;
+    if( sensor1 == HIGH )     { setStates(  LOW,  LOW, HIGH ) ; }   // red
+    else { 
+        if( sensor2 == HIGH ) { setStates(  LOW, HIGH,  LOW ) ; }   // orange
+        else                  { setStates( HIGH,  LOW,  LOW ) ; }   // green
     }
-    #undef setStates
+  #undef setStates
 
     digitalWrite( greenPin,  greenState ) ;
     digitalWrite( yellowPin, yellowState) ;

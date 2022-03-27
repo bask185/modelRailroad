@@ -100,7 +100,7 @@ const int   statusLed ;
 #elif defined SIGNALS
 #include "src/signal.h"
 const int nSignals = 4 ;
-const int nAddresses = nSignals ;
+const int nAddresses = nSignals + 1 ;   // N.B. for 3 state signals, we listen to an extra address 
 const int signalPins[ nSignals * 3 ] = 
 {  3,  4,  5, 
    6,  7,  8, 
@@ -189,20 +189,9 @@ void setOutput( uint16 Address, uint8 state )
         coilDrive[ID].setState( state ) ;
 
     #elif defined SIGNALS
-        if( state )                                                             // if 'detector' is made.. TODO, draw me, and fixme
-        {
-              signal[ID].setState( RED ) ;
-            signal[ID-1].setState( YELLOW) ;
-        }
-        else
-        {
-            signal[ID].setState( state ) ; 
-        }
-        //signal[ID].setState( state ) ;                                          // TODO for signals need to use address to calculate GREEN, YELLOW OR RED
-        //signal[ID].setState( state ) ;                                          // TODO 2 signals may be set if one feedback section changes state
+        if( ID < nSignals) signal[ ID ].setSensor1( state ) ;                   // This code should work, it is ment for 3 tone color
+        if( ID > 0 )       signal[ID-1].setSensor2( state ) ;
 
-
-        signal[ID].setState( state ) ;                                          // TODO depending on combined addresses or NOT, this may become different    
     #endif
     }
 }
