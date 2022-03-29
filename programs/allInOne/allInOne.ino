@@ -97,10 +97,14 @@ const int   statusLed ;
         uint16 sampleTime = 3 ;
         #endif
 
-#elif defined SIGNALS
+#elif defined SIGNALS || defined SIGNALS_BLOCK
 #include "src/signal.h"
 const int nSignals = 4 ;
-const int nAddresses = nSignals + 1 ;   // N.B. for 3 state signals, we listen to an extra address 
+    #if defined SIGNALS_BLOCK
+const int nAddresses = nSignals + 1 ;   // N.B. for block signals addresses are linked
+    #else
+const int nAddresses = nSignals * 2;    // N.B. for 3 state lose signals, we listen to an extra address 
+    #endif
 const int signalPins[ nSignals * 3 ] = 
 {  3,  4,  5, 
    6,  7,  8, 
@@ -148,7 +152,7 @@ void setup()
         servo[i].begin() ;
     }
 
-#elif defined SIGNALS
+#elif defined SIGNALS || defined SIGNALS_BLOCK
     for( int i = 0 ; i < nSignals ; i ++ )
     {
         signal[i].begin() ;
@@ -189,8 +193,12 @@ void setOutput( uint16 Address, uint8 state )
         coilDrive[ID].setState( state ) ;
 
     #elif defined SIGNALS
-        if( ID < nSignals) signal[ ID ].setSensor1( state ) ;                   // This code should work, it is ment for 3 tone color
-        if( ID > 0 )       signal[ID-1].setSensor2( state ) ;
+        if( ID < nSignals) { signal[ ID ].setSensor1( state ) ; }                  // This code should work, it is ment for 3 tone color
+        if( ID > 0 )       { signal[ID-1].setSensor2( state ) ; }
+     
+    #elif defined SIGNALS_BLOCK
+        if( ID & 1 ) { signal[ID/2].setSensor2( state ) ; }                     // unequal ID means sensor 2
+        else         { signal[ID/2].setSensor1( state ) ; }                     //   equal ID means sensor 1
 
     #endif
     }

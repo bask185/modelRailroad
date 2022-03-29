@@ -1,2 +1,2 @@
-#define LNET
-#define SERVO
+#define DCC
+#define SIGNALS_BLOCK

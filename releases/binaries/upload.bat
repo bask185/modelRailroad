@@ -5,7 +5,7 @@ setlocal EnableDelayedExpansion
 %=Do not remove this line=%
 )
 
-set /p baseType= "select base type!\n!SIGNALS!\n!RELAY!\n!OCCUPANCY!\n!SERVO!\n!MOSFET!\n!CONTROLPANEL!\n!!\n!"
+set /p baseType= "select base type!\n!SIGNALS!\n!SIGNALS_BLOCK!\n!RELAY!\n!OCCUPANCY!\n!SERVO!\n!MOSFET!\n!CONTROLPANEL!\n!!\n!"
 set /p interface= "select interface, DCC, LNET or XNET!\n!!\n!"
 set /p comNumber= "select comport!\n!!\n!"
 

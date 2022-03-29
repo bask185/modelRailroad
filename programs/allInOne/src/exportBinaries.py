@@ -21,7 +21,8 @@ import shutil
 # #define MOSFET
 # #define RELAY
 # #define OCCUPANCY
-# #define SIGNAL
+# #define SIGNALS
+# #define SIGNALS_BLOCK
 # define CONTROLPANEL
 # #define LED_DRIVER
 # #define SHUTTLE
@@ -29,7 +30,7 @@ import shutil
 #define DEFAULT_DCC_ADDRESS 1
 
 interfaces = ["LNET", "XNET", "DCC"] 
-bases = ["CONTROLPANEL", "MOSFET", "SERVO", "OCCUPANCY", "RELAY", "SIGNALS"]
+bases = ["CONTROLPANEL", "MOSFET", "SERVO", "OCCUPANCY", "RELAY", "SIGNALS", "SIGNALS_BLOCK"]
 
 for interface in interfaces :
 
