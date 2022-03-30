@@ -76,9 +76,18 @@ const int   statusLed ;
 
 
 #elif defined RELAY
+    #include "src/Relay.h"
     const int nRelays = 16 ;
     const int nAddresses = nRelays ;
-    const int relay[nRelays]   = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, A0, A1, A2, A3, A4 } ;
+    const int relayPins[nRelays] = { 10,  9,  8,  7,  6,  5,  4,  3
+                                     A5, A4, A3, A2, A1, A0, 11, 12 } ;
+    Relay relay[nRelays] =
+    {
+        Relay( relayPins[ 0] ),  Relay( relayPins[ 1] ), Relay( relayPins[ 2] ), Relay( relayPins[ 3] ),   
+        Relay( relayPins[ 4] ),  Relay( relayPins[ 5] ), Relay( relayPins[ 6] ), Relay( relayPins[ 7] ),   
+        Relay( relayPins[ 8] ),  Relay( relayPins[ 9] ), Relay( relayPins[10] ), Relay( relayPins[11] ),   
+        Relay( relayPins[12] ),  Relay( relayPins[13] ), Relay( relayPins[14] ), Relay( relayPins[15] )
+    } ; 
 
 #elif defined OCCUPANCY || defined CONTROLPANEL                                // both OCCUPANCY detector as switch panel use same inputs
     const int nSensors = 16 ;
@@ -163,6 +172,11 @@ void setup()
     {
         coilDrive[i].begin() ;
     }
+#elif defined RELAY
+    for( int i = 0 ; i < nRelays ; i ++ )
+    {
+        relay[i].begin() ;
+    }
 
 #endif
 }
@@ -203,9 +217,6 @@ void setOutput( uint16 Address, uint8 state )
     #endif
     }
 }
-
-
-
 
 
 
