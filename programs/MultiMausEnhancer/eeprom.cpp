@@ -6,7 +6,7 @@
 
 const int nPointsPerStreet = 16 ;
 const int nStreets = 16 ;
-const int baseAddress = 100 ;
+const int baseAddress = 1000 ;
 const int endAddress (baseAddress + nPointsPerStreet) ;
 // const int maxAddress = 1024 ;   unused
 

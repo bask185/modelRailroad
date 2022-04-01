@@ -9,10 +9,11 @@
 
 class Debounce {
 public:
-	Debounce(unsigned char _pin);
+	Debounce(unsigned char _pin );
 	unsigned char getState();
-	void debounce();
-	void debounce( bool );
+	void begin() ;
+	void update() ;
+	void update( bool ) ;
 
 private:
 	unsigned char state;

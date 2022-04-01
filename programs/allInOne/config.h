@@ -1,2 +1,2 @@
 #define DCC
-#define RELAY
+#define SIGNALS_BLOCK

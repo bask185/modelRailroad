@@ -39,26 +39,28 @@ const int   statusLed ;
 #ifdef SERVO
     #include "src/ServoSweep.h"
 
-    const int nServos = 4 ;
-    const int nAddresses = nServos ;
+    const int nObjects = 4 ;
+    const int nAddresses = nObjects ;
 
     const int servPin1 = 3, relPin1 =  7 ,  // fix pins
               servPin2 = 4, relPin2 =  8 ,
               servPin3 = 5, relPin3 =  9 ,
               servPin4 = 6, relPin4 = 10 ;
 
-    ServoSweep servo[nServos] =
+    ServoSweep servo[nObjects] =
     {
         ServoSweep( servPin1, 80, 100, 1, 20, relPin1 ),
         ServoSweep( servPin2, 80, 100, 1, 20, relPin2 ),
         ServoSweep( servPin3, 80, 100, 1, 20, relPin3 ),
         ServoSweep( servPin4, 80, 100, 1, 20, relPin4 )
     } ;
+    #define object servo 
+    #define IS_OUTPUT
 
 #elif defined MOSFET
     #include "src/CoilDrive.h"
-    const int nCoilDrives = 4 ;
-    const int nAddresses = nCoilDrives ;
+    const int nObjects = 4 ;
+    const int nAddresses = nObjects ;
 
     const int switchTime = 250 ; // ms
     const int coilPin1A = 3, coilPin1B =  4 ,
@@ -66,67 +68,81 @@ const int   statusLed ;
               coilPin3A = 7, coilPin3B =  8 ,
               coilPin4A = 9, coilPin4B = 10 ;
 
-    CoilDrive coilDrive[ nCoilDrives] =
+    CoilDrive coilDrive[ nObjects] =
     {
         CoilDrive( coilPin1A, coilPin1B, switchTime ) ,
         CoilDrive( coilPin2A, coilPin2B, switchTime ) ,
         CoilDrive( coilPin3A, coilPin3B, switchTime ) ,
         CoilDrive( coilPin4A, coilPin4B, switchTime ) 
     } ;
+    #define object coilDrive 
+    #define IS_OUTPUT
 
 
 #elif defined RELAY
     #include "src/Relay.h"
-    const int nRelays = 16 ;
-    const int nAddresses = nRelays ;
-    const int relayPins[nRelays] = { 10,  9,  8,  7,  6,  5,  4,  3
+    const int nObjects = 16 ;
+    const int nAddresses = nObjects ;
+    const int relayPins[nObjects] = { 10,  9,  8,  7,  6,  5,  4,  3,
                                      A5, A4, A3, A2, A1, A0, 11, 12 } ;
-    Relay relay[nRelays] =
+    Relay relay[nObjects] =
     {
         Relay( relayPins[ 0] ),  Relay( relayPins[ 1] ), Relay( relayPins[ 2] ), Relay( relayPins[ 3] ),   
         Relay( relayPins[ 4] ),  Relay( relayPins[ 5] ), Relay( relayPins[ 6] ), Relay( relayPins[ 7] ),   
         Relay( relayPins[ 8] ),  Relay( relayPins[ 9] ), Relay( relayPins[10] ), Relay( relayPins[11] ),   
         Relay( relayPins[12] ),  Relay( relayPins[13] ), Relay( relayPins[14] ), Relay( relayPins[15] )
     } ; 
+    #define object relay 
+    #define IS_OUTPUT
+
+#elif defined SIGNALS || defined SIGNALS_BLOCK
+    #include "src/signal.h"
+    const int nObjects = 4 ;
+        #if defined SIGNALS_BLOCK
+    const int nAddresses = nObjects + 1 ;   // N.B. for block signals addresses are linked
+        #else
+    const int nAddresses = nObjects * 2;    // N.B. for 3 state lose signals, we listen to an extra address 
+        #endif
+    const int signalPins[ nObjects * 3 ] = 
+    {    3,  4,  5, 
+         6,  7,  8, 
+        13, A5, 12, 
+         9, 10, 11
+    } ;
+
+    Signal signal[] =
+    {
+        Signal( signalPins[ 0], signalPins[ 1], signalPins[ 2] ),
+        Signal( signalPins[ 3], signalPins[ 4], signalPins[ 5] ),
+        Signal( signalPins[ 6], signalPins[ 7], signalPins[ 8] ),
+        Signal( signalPins[ 9], signalPins[10], signalPins[11] )
+    } ;
+    #define object signal 
+    #define IS_OUTPUT
+
 
 #elif defined OCCUPANCY || defined CONTROLPANEL                                // both OCCUPANCY detector as switch panel use same inputs
-    const int nSensors = 16 ;
-    const int nAddresses = nSensors ;
-    const int sensorPin[nSensors] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, A0, A1, A2, A3, A4 } ;
+    const int nObjects = 16 ;
+    const int nAddresses = nObjects ;
+    const int inputPin[nObjects] = { 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, A0, A1, A2, A3, A4 } ;
     Debounce input[] =
     {
-        Debounce( sensorPin[0] ), Debounce( sensorPin[4] ), Debounce( sensorPin[ 8] ), Debounce( sensorPin[12] ),
-        Debounce( sensorPin[1] ), Debounce( sensorPin[5] ), Debounce( sensorPin[ 9] ), Debounce( sensorPin[13] ),
-        Debounce( sensorPin[2] ), Debounce( sensorPin[6] ), Debounce( sensorPin[10] ), Debounce( sensorPin[14] ),
-        Debounce( sensorPin[3] ), Debounce( sensorPin[7] ), Debounce( sensorPin[11] ), Debounce( sensorPin[15] )
+        Debounce( inputPin[0] ), Debounce( inputPin[4] ), Debounce( inputPin[ 8] ), Debounce( inputPin[12] ),
+        Debounce( inputPin[1] ), Debounce( inputPin[5] ), Debounce( inputPin[ 9] ), Debounce( inputPin[13] ),
+        Debounce( inputPin[2] ), Debounce( inputPin[6] ), Debounce( inputPin[10] ), Debounce( inputPin[14] ),
+        Debounce( inputPin[3] ), Debounce( inputPin[7] ), Debounce( inputPin[11] ), Debounce( inputPin[15] )
     } ;
+
         #if defined OCCUPANCY
         uint16 sampleTime = 30 ;
         #else
         uint16 sampleTime = 3 ;
         #endif
 
-#elif defined SIGNALS || defined SIGNALS_BLOCK
-#include "src/signal.h"
-const int nSignals = 4 ;
-    #if defined SIGNALS_BLOCK
-const int nAddresses = nSignals + 1 ;   // N.B. for block signals addresses are linked
-    #else
-const int nAddresses = nSignals * 2;    // N.B. for 3 state lose signals, we listen to an extra address 
-    #endif
-const int signalPins[ nSignals * 3 ] = 
-{  3,  4,  5, 
-   6,  7,  8, 
-  13, A5, 12, 
-   9, 10, 11
-} ;
-Signal signal[] =
-{
-    Signal( signalPins[ 0], signalPins[ 1], signalPins[ 2] ),
-    Signal( signalPins[ 3], signalPins[ 4], signalPins[ 5] ),
-    Signal( signalPins[ 6], signalPins[ 7], signalPins[ 8] ),
-    Signal( signalPins[ 9], signalPins[10], signalPins[11] )
-} ;
+    #define object input
+    #define IS_INPUT
+
+
 
 #else
 #error NO MODULE DEFINED, CANNOT COMPILE
@@ -154,31 +170,11 @@ void setup()
     //dcc.init( /* add paramterts */ ) ;
 #endif
 
-// INITIALIZE MODULE
-#if defined SERVO
-    for( int i = 0 ; i < nServos ; i ++ )
+// INITIALIZE IO 
+    for( int i = 0 ; i < nObjects ; i ++ )
     {
-        servo[i].begin() ;
+        object[i].begin() ;
     }
-
-#elif defined SIGNALS || defined SIGNALS_BLOCK
-    for( int i = 0 ; i < nSignals ; i ++ )
-    {
-        signal[i].begin() ;
-    }
-
-#elif defined MOSFET
-    for( int i = 0 ; i < nCoilDrives ; i ++ )
-    {
-        coilDrive[i].begin() ;
-    }
-#elif defined RELAY
-    for( int i = 0 ; i < nRelays ; i ++ )
-    {
-        relay[i].begin() ;
-    }
-
-#endif
 }
 
 
@@ -197,22 +193,16 @@ void setOutput( uint16 Address, uint8 state )
     {
         uint8 ID = Address - myAddress ;                                        // get ID
 
-    #if defined RELAY                       
-        digitalWrite( relay[ID], state ) ;                                      // directly set relay pin
+    #if defined RELAY || defined SERVO || defined MOSFET                         
+        object[ID].setState( state ) ;
 
-    #elif defined SERVO                                                         // set servoSweep state
-        servo[ID].setState( state ) ;
-
-    #elif defined MOSFET                                                        // set one of 2 coils, and turn it off later.
-        coilDrive[ID].setState( state ) ;
-
-    #elif defined SIGNALS
-        if( ID < nSignals) { signal[ ID ].setSensor1( state ) ; }                  // This code should work, it is ment for 3 tone color
-        if( ID > 0 )       { signal[ID-1].setSensor2( state ) ; }
-     
     #elif defined SIGNALS_BLOCK
-        if( ID & 1 ) { signal[ID/2].setSensor2( state ) ; }                     // unequal ID means sensor 2
-        else         { signal[ID/2].setSensor1( state ) ; }                     //   equal ID means sensor 1
+        if( ID < nObjects ) { signal[ ID ].setSensor1( state ) ; }                  // This code should work, it is ment for 3 tone color
+        if( ID > 0 )        { signal[ID-1].setSensor2( state ) ; }
+     
+    #elif defined SIGNALS
+        if( ID & 1 )        { signal[ID/2].setSensor2( state ) ; }                     // unequal ID means sensor 2
+        else                { signal[ID/2].setSensor1( state ) ; }                     //   equal ID means sensor 1
 
     #endif
     }
@@ -220,7 +210,7 @@ void setOutput( uint16 Address, uint8 state )
 
 
 
-/********* CALL BACK FUNCTIONS *********/
+/********* INTERFACE CALL BACK FUNCTIONS *********/
 // Xnet
 void notifyXNetTrnt( uint16 Address, uint8 data )
 {
@@ -252,8 +242,7 @@ void notifyDccAccTurnoutOutput ( uint16 Addr, uint8 Direction, uint8 OutputPower
 }
 
 
-
-/********* TRANSMITT FUNCTIONS, Xnet and Lnet *********/
+/********* INTERFACE TRANSMITT FUNCTIONS, Xnet and Lnet *********/
 // Lnet
 void sendOPC_SW_REQ(int address, byte dir, byte on)
 {
@@ -329,48 +318,38 @@ void loop()
     REPEAT_MS( 50 )
     {
         uint16 sample = analogRead( configPin ) ;
-        if( sample < 500 ) { configBtn.debounce( 0 ) ; }
-        else               { configBtn.debounce( 1 ) ; }
+        if( sample < 500 ) { configBtn.update( 0 ) ; }
+        else               { configBtn.update( 1 ) ; }
     } END_REPEAT
     
     if( configBtn.getState() == FALLING ) { getAddress = true ; }
 
 // update status led
-    REPEAT_MS( 1000 )
+    REPEAT_MS( 500 )
     {
         if( getAddress == true ) { digitalWrite( statusLed, !digitalRead( statusLed ) ) ; }
         else                     { digitalWrite( statusLed, HIGH ) ; }
     } END_REPEAT
 
-// update servo motors and frog relais
-#if defined SERVO
-    for( int i = 0 ; i < nServos ; i ++ )
+// update outputs
+#if defined IS_OUTPUT
+    for( int i = 0 ; i < nObjects ; i ++ )
     {
-        servo[i].update() ;
-    }
-// check when mosfets needs to be turned off
-#elif defined MOSFET
-    for( int i = 0 ; i < nCoilDrives ; i ++ )
-    {
-        coilDrive[i].update() ;
+        object[i].update() ;
     }
 
 // debounce inputs and transmitt updates
-#elif defined OCCUPANCY || defined CONTROLPANEL
+#elif defined IS_INPUT
     REPEAT_MS( sampleTime )                                                     // 1 input will be debounced at the time
     {
-        input[index].debounce() ;
-        if( ++ index == nSensors ) index = 0 ;
+        object[index].update() ;
+        if( ++ index == nObjects ) index = 0 ;
     
     } END_REPEAT
 
-    uint8 state = input[index].getState() ;
+    uint8 state = object[index].getState() ;
     if( state == FALLING ) sendState( index, 1 ) ;                              // depending on interface, must either transmit detector state
-    if( state ==  RISING ) sendState( index, 0 ) ;                              // or take control of a point
-
-
-//#elif defined SIGNALS                                                            // signals have (not yet) need for an update function. Perhaps on one day I will add fading or something.
-    
+    if( state ==  RISING ) sendState( index, 0 ) ;                              // or take control of a point   
 
 #endif
 }

@@ -14,3 +14,7 @@ void Relay::setState( uint8 _state )
 {
     digitalWrite( pin, _state ) ;
 }
+
+void Relay::update()
+{
+}

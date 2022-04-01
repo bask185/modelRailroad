@@ -2,9 +2,12 @@
 Debounce::Debounce(unsigned char _pin)
 {
 	pin = _pin;
-	
-	if( _pin == 255 ) return ;
-	pinMode(_pin, INPUT_PULLUP); // take note I use a pull-up resistor by default
+}
+
+void Debounce::begin()
+{
+	if( pin == 255 ) return ;
+	pinMode(pin, INPUT_PULLUP); // take note I use a pull-up resistor by default
 }
 
 unsigned char Debounce::getState() {
@@ -15,7 +18,7 @@ unsigned char Debounce::getState() {
 
 	return retValue; }
 
-void Debounce::debounce() {
+void Debounce::update() {
 	bool newSample = digitalRead(pin);
 
 	if(newSample == oldSample) {	// if the same state is detected atleast twice in 20ms...
@@ -36,7 +39,7 @@ void Debounce::debounce() {
 	oldSample = newSample;
 }
 
-void Debounce::debounce( bool newSample ) {
+void Debounce::update( bool newSample ) {
 
 	if(newSample == oldSample) {	// if the same state is detected atleast twice in 20ms...
 	
