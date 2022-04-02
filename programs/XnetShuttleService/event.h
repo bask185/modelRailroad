@@ -1,15 +1,28 @@
 #include <Arduino.h>
 #include "src/macros.h"
 
-const int FAST = 250 ;
-const int SLOW = 500 ;
+const int FAST = 125 ;
+const int SLOW = 250 ;
 
 enum events
 {
-    runModeEnabled = 1,
-    teachingEnabled,
+    ready2receiveTrain = 1, // modes
+    receivingTrain,
+    sendingTrain,
+    pausingTrain,
+    teachin,
+    waiting4address,
+
+
+    teachingEnabled,        // events
+    started,
+    stopped,
+    onOffPressed,
+    onOffReleased,
     turnedOff,
-    detectorMade,           
+    detector1Made,           
+    detector2Made,  
+    detectorReleased,         
     trainBraking,       
     trainArrived,
     trainDeparting,     
@@ -18,17 +31,11 @@ enum events
     slotAdded,
     slotNotFound, 
     slotLoaded,
-    waiting4address,
     addressReceived,
 } ;
 
-enum modes
-{
-    OFF,
-    running,
-    teachin
-} ;
 
-extern void eventHandler() ;
+extern void lightHandler() ;
 extern void setLights( uint8 ) ;
+extern void setMode( uint8 ) ;
 extern uint8 mode ;

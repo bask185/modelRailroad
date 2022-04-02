@@ -1,8 +1,5 @@
 #include <Arduino.h>
-#include "trains.h"
 #include "src/macros.h"
-
-extern Train train ;
 
 enum states
 {

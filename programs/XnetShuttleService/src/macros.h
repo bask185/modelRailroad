@@ -2,6 +2,8 @@
 #ifndef MACROS
 #define MACROS
 
+#include "XpressNetMaster.h"
+
 // #define DEBUG
 
 #define REPEAT_US(x)    { \
@@ -43,5 +45,10 @@
 #define STR2(s)             #s
 #define STR(s)              STR2(s)
 
+#ifdef DEBUG
+#define DebugPrint(x) Serial.println(x)
+#else
+#define DebugPrint(x) ;
+#endif
 
 #endif

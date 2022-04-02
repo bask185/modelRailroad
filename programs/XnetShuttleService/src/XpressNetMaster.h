@@ -30,7 +30,7 @@
 // 	- fix Locomotive speed and direction operation (0xE4) Speed Steps
 // 	- fix range CV# Adr to uint16_t
 // */
-// #define DEBUG
+#define DEBUG
 
 #ifndef DEBUG
 
