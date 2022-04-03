@@ -147,7 +147,7 @@ StateFunction( accelerating )
     }
     onState
     {
-        if( sm.repeat( breakingFactor ) )
+        if( sm.repeat( acceleratingFactor ) )
         {
             if( speed <= maxSpeed )
             {

@@ -1,21 +1,21 @@
 #include "config.h"
 #include "src/macros.h"
 #include "src/debounceClass.h"
-#include <EEPROM.h>
+#include "eeprom.h"
 
 /*************** INITIALIZATION *****************/
 
 
 /*******  GENERAL IO ********/
-const int   ADDRESS = 0x00 ;                                                    // address in EEPROM for 'myAddress'
 uint16      myAddress ;                                                         // STORED IN EEPROM
 const int   configPin = A6 ;                                                    // in all variants this pin is used to configure address may also be A7 perhaps, check board designs
 bool        getAddress ;
 Debounce    configBtn( 255 ) ;                                                  // analog only
 const int   statusLed ;
+uint32      servoPositions[8] ;
 
 /******* INTERFACE *******/
-#if   defined XNET
+#if defined XNET
     #include "src/XpressNetMaster.h"
     const int RS485DIR = 2 ;
     XpressNetMasterClass Xnet ;
@@ -49,7 +49,7 @@ const int   statusLed ;
 
     ServoSweep servo[nObjects] =
     {
-        ServoSweep( servPin1, 80, 100, 1, 20, relPin1 ),
+        ServoSweep( servPin1, 80, 100, 1, 20, relPin1 ), // TODO fetch values from EEPROM
         ServoSweep( servPin2, 80, 100, 1, 20, relPin2 ),
         ServoSweep( servPin3, 80, 100, 1, 20, relPin3 ),
         ServoSweep( servPin4, 80, 100, 1, 20, relPin4 )
@@ -152,11 +152,12 @@ const int   statusLed ;
 void setup()
 {
 // LOAD ADDRESS FROM EEPROM
-    EEPROM.get( ADDRESS, myAddress ) ;
+    
+    myAddress = loadMyAddress() ;
     if( myAddress == 0xFFFF )
     {
         myAddress = 1 ;
-        EEPROM.put( ADDRESS, myAddress ) ;
+        storeMyAddress( myAddress ) ;
     }
 
 // INITIALIZE INTERFACE
@@ -167,7 +168,7 @@ void setup()
     LocoNet.init(LNtxPin);
 
 #elif defined DCC
-    //dcc.init( /* add paramterts */ ) ;
+    //dcc.init( /* add parameters */ ) ;
 #endif
 
 // INITIALIZE IO 
@@ -184,7 +185,7 @@ void storeNewAddress( uint16 _address )
 {
     getAddress = false ;
     myAddress = _address ;
-    EEPROM.put( ADDRESS, myAddress ) ;
+    storeMyAddress( myAddress ) ;
 }
 
 void setOutput( uint16 Address, uint8 state )
