@@ -291,7 +291,7 @@ void sendState( uint8 IO, uint8 state )
 
 
 /***** MAIN TASKS *****/
-void interfaceHanler()
+void interfaceHandler()
 {
 #if defined XNET
     Xnet.update() ;
@@ -353,7 +353,7 @@ void updateIO()
 /********* MAIN LOOP **********/
 void loop()
 {
-    inferfaceHandler() ;
+    interfaceHandler() ;
     updateConfigButton() ;
     updateStatusLed() ;
     updateIO() ;
