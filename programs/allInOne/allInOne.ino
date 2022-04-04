@@ -181,19 +181,11 @@ void setup()
 
 
 /********* OUTPUTS ************/
-
-void storeNewAddress( uint16 _address )
-{
-    getAddress = false ;
-    myAddress = _address ;
-    EEPROM.put( ADDRESS, myAddress ) ;
-}
-
 void setOutput( uint16 Address, uint8 state )
 {
     if( Address >= myAddress && Address < (myAddress + nAddresses ) )           // if valid address for this module..
     {
-        uint8 ID = Address - myAddress ;                                        // get ID
+        uint8 ID = Address - myAddress ;                                        // get ID, TODO add blinking option for status led when command is received
 
     #if defined RELAY || defined SERVO || defined MOSFET                         
         object[ID].setState( state ) ;
@@ -208,6 +200,13 @@ void setOutput( uint16 Address, uint8 state )
 
     #endif
     }
+}
+
+void storeNewAddress( uint16 _address )
+{
+    getAddress = false ;
+    myAddress = _address ;
+    EEPROM.put( ADDRESS, myAddress ) ;
 }
 
 
@@ -232,6 +231,7 @@ void notifySwitchRequest( uint16 Address, uint8 Output, uint8 Direction )
         else             setOutput( Address, Direction ) ;
     }
 }
+// SK: add occupancy processing for setting LEDs on control panel
 
 // DCC
 void notifyDccAccTurnoutOutput ( uint16 Addr, uint8 Direction, uint8 OutputPower )
@@ -290,12 +290,9 @@ void sendState( uint8 IO, uint8 state )
 }
 
 
-
-
-/********* MAIN LOOP **********/
-void loop()
+/***** MAIN TASKS *****/
+void interfaceHanler()
 {
-/******* INTERFACE HANDLING *******/
 #if defined XNET
     Xnet.update() ;
 
@@ -308,12 +305,11 @@ void loop()
     {   
         LocoNet.processSwitchSensorMessage( LnPacket ) ;
     }
-
 #endif
-    
-/******* ROUND ROBIN TASKS *******/
+}
 
-// debounce config pin      NOTE: move to separate function?
+void updateConfigButton()
+{
     REPEAT_MS( 50 )         
     {
         uint16 sample = analogRead( configPin ) ;
@@ -322,20 +318,26 @@ void loop()
     } END_REPEAT
     
     if( configBtn.getState() == FALLING ) { getAddress = true ; }
+}
 
-// update status led NOTE: may be relocated to it's own file or function if it becomes more complex
+void updateStatusLed()
+{
     REPEAT_MS( 500 )
     {
         if( getAddress == true ) { digitalWrite( statusLed, !digitalRead( statusLed ) ) ; }
         else                     { digitalWrite( statusLed, HIGH ) ; }
     } END_REPEAT
+}
 
-
+void updateIO()
+{
 #ifdef sampleTime                                                               // inputs need an interval for debouncing
-    if( millis() - prevTime > sampleTime )
-    #endif
+    if( millis() - prevTime >= sampleTime )
+
+#endif
     {
         prevTime = millis() ;
+
         object[index].update() ;                                                // output can just run continously
         if( ++ index == nObjects ) index = 0 ;
     } 
@@ -346,4 +348,13 @@ void loop()
     if( state ==  RISING ) sendState( index, 0 ) ;                              // or take control of a point   
 
 #endif
+}
+
+/********* MAIN LOOP **********/
+void loop()
+{
+    inferfaceHandler() ;
+    updateConfigButton() ;
+    updateStatusLed() ;
+    updateIO() ;
 }
