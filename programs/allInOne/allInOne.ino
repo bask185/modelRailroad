@@ -14,6 +14,7 @@ bool        getAddress ;
 Debounce    configBtn( 255 ) ;                                                  // analog only
 const int   statusLed ;
 uint8       index = 0 ;
+uint32      prevTime = 0 ; 
 
 /******* INTERFACE *******/
 #if   defined XNET
@@ -330,17 +331,14 @@ void loop()
     } END_REPEAT
 
 
-    #ifdef sampleTime
-    REPEAT_MS( sampleTime )                                                     // inputs need an interval for debouncing
-    {
+#ifdef sampleTime                                                               // inputs need an interval for debouncing
+    if( millis() - prevTime > sampleTime )
     #endif
-
+    {
+        prevTime = millis() ;
         object[index].update() ;                                                // output can just run continously
         if( ++ index == nObjects ) index = 0 ;
-
-    #ifdef sampleTime 
-    } END_REPEAT
-    #endif
+    } 
 
 #if defined IS_INPUT
     uint8 state = object[index].getState() ;
