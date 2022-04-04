@@ -12,4 +12,5 @@ public:
 
 private:
     uint8 pin ;
+    uint8 state ;
 } ;

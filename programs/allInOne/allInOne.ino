@@ -13,6 +13,8 @@ bool        getAddress ;
 Debounce    configBtn( 255 ) ;                                                  // analog only
 const int   statusLed ;
 uint32      servoPositions[8] ;
+uint8       index = 0 ;
+uint32      prevTime = 0 ; 
 
 /******* INTERFACE *******/
 #if defined XNET
@@ -134,9 +136,9 @@ uint32      servoPositions[8] ;
     } ;
 
         #if defined OCCUPANCY
-        uint16 sampleTime = 30 ;
+        #define sampleTime 30
         #else
-        uint16 sampleTime = 3 ;
+        #define sampleTime 3
         #endif
 
     #define object input
@@ -192,7 +194,7 @@ void setOutput( uint16 Address, uint8 state )
 {
     if( Address >= myAddress && Address < (myAddress + nAddresses ) )           // if valid address for this module..
     {
-        uint8 ID = Address - myAddress ;                                        // get ID
+        uint8 ID = Address - myAddress ;                                        // get ID, TODO add blinking option for status led when command is received
 
     #if defined RELAY || defined SERVO || defined MOSFET                         
         object[ID].setState( state ) ;
@@ -231,6 +233,7 @@ void notifySwitchRequest( uint16 Address, uint8 Output, uint8 Direction )
         else             setOutput( Address, Direction ) ;
     }
 }
+// SK: add occupancy processing for setting LEDs on control panel
 
 // DCC
 void notifyDccAccTurnoutOutput ( uint16 Addr, uint8 Direction, uint8 OutputPower )
@@ -289,17 +292,14 @@ void sendState( uint8 IO, uint8 state )
 }
 
 
-
-
-/********* MAIN LOOP **********/
-void loop()
+/***** MAIN TASKS *****/
+void interfaceHandler()
 {
-    static uint8 index = 0 ;
-
-
-/******* INTERFACE HANDLING *******/
 #if defined XNET
     Xnet.update() ;
+
+#elif defined DCC
+    dcc.process() ;
 
 #elif defined LNET
     LnPacket = LocoNet.receive() ;
@@ -307,16 +307,12 @@ void loop()
     {   
         LocoNet.processSwitchSensorMessage( LnPacket ) ;
     }
-
-#elif defined DCC
-    dcc.process() ;
-
 #endif
-    
-/******* ROUND ROBIN TASKS *******/
+}
 
-// debounce config pin
-    REPEAT_MS( 50 )
+void updateConfigButton()
+{
+    REPEAT_MS( 50 )         
     {
         uint16 sample = analogRead( configPin ) ;
         if( sample < 500 ) { configBtn.update( 0 ) ; }
@@ -324,33 +320,43 @@ void loop()
     } END_REPEAT
     
     if( configBtn.getState() == FALLING ) { getAddress = true ; }
+}
 
-// update status led
+void updateStatusLed()
+{
     REPEAT_MS( 500 )
     {
         if( getAddress == true ) { digitalWrite( statusLed, !digitalRead( statusLed ) ) ; }
         else                     { digitalWrite( statusLed, HIGH ) ; }
     } END_REPEAT
+}
 
-// update outputs
-#if defined IS_OUTPUT
-    for( int i = 0 ; i < nObjects ; i ++ )
-    {
-        object[i].update() ;
-    }
+void updateIO()
+{
+#ifdef sampleTime                                                               // inputs need an interval for debouncing
+    if( millis() - prevTime >= sampleTime )
 
-// debounce inputs and transmitt updates
-#elif defined IS_INPUT
-    REPEAT_MS( sampleTime )                                                     // 1 input will be debounced at the time
+#endif
     {
-        object[index].update() ;
+        prevTime = millis() ;
+
+        object[index].update() ;                                                // output can just run continously
         if( ++ index == nObjects ) index = 0 ;
-    
-    } END_REPEAT
+    } 
 
+#if defined IS_INPUT
     uint8 state = object[index].getState() ;
     if( state == FALLING ) sendState( index, 1 ) ;                              // depending on interface, must either transmit detector state
     if( state ==  RISING ) sendState( index, 0 ) ;                              // or take control of a point   
 
 #endif
+}
+
+/********* MAIN LOOP **********/
+void loop()
+{
+    interfaceHandler() ;
+    updateConfigButton() ;
+    updateStatusLed() ;
+    updateIO() ;
 }
