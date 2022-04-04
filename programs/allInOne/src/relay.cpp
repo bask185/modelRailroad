@@ -12,9 +12,10 @@ void Relay::begin()
 
 void Relay::setState( uint8 _state )
 {
-    digitalWrite( pin, _state ) ;
+    state = _state ;
 }
 
 void Relay::update()
 {
+    digitalWrite( pin, _state ) ;
 }

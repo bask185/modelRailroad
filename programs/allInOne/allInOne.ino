@@ -13,6 +13,7 @@ const int   configPin = A6 ;                                                    
 bool        getAddress ;
 Debounce    configBtn( 255 ) ;                                                  // analog only
 const int   statusLed ;
+uint8       index = 0 ;
 
 /******* INTERFACE *******/
 #if   defined XNET
@@ -134,9 +135,9 @@ const int   statusLed ;
     } ;
 
         #if defined OCCUPANCY
-        uint16 sampleTime = 30 ;
+        #define sampleTime 30
         #else
-        uint16 sampleTime = 3 ;
+        #define sampleTime 3
         #endif
 
     #define object input
@@ -293,12 +294,12 @@ void sendState( uint8 IO, uint8 state )
 /********* MAIN LOOP **********/
 void loop()
 {
-    static uint8 index = 0 ;
-
-
 /******* INTERFACE HANDLING *******/
 #if defined XNET
     Xnet.update() ;
+
+#elif defined DCC
+    dcc.process() ;
 
 #elif defined LNET
     LnPacket = LocoNet.receive() ;
@@ -307,15 +308,12 @@ void loop()
         LocoNet.processSwitchSensorMessage( LnPacket ) ;
     }
 
-#elif defined DCC
-    dcc.process() ;
-
 #endif
     
 /******* ROUND ROBIN TASKS *******/
 
-// debounce config pin
-    REPEAT_MS( 50 )
+// debounce config pin      NOTE: move to separate function?
+    REPEAT_MS( 50 )         
     {
         uint16 sample = analogRead( configPin ) ;
         if( sample < 500 ) { configBtn.update( 0 ) ; }
@@ -324,29 +322,27 @@ void loop()
     
     if( configBtn.getState() == FALLING ) { getAddress = true ; }
 
-// update status led
+// update status led NOTE: may be relocated to it's own file or function if it becomes more complex
     REPEAT_MS( 500 )
     {
         if( getAddress == true ) { digitalWrite( statusLed, !digitalRead( statusLed ) ) ; }
         else                     { digitalWrite( statusLed, HIGH ) ; }
     } END_REPEAT
 
-// update outputs
-#if defined IS_OUTPUT
-    for( int i = 0 ; i < nObjects ; i ++ )
-    {
-        object[i].update() ;
-    }
 
-// debounce inputs and transmitt updates
-#elif defined IS_INPUT
-    REPEAT_MS( sampleTime )                                                     // 1 input will be debounced at the time
+    #ifdef sampleTime
+    REPEAT_MS( sampleTime )                                                     // inputs need an interval for debouncing
     {
-        object[index].update() ;
+    #endif
+
+        object[index].update() ;                                                // output can just run continously
         if( ++ index == nObjects ) index = 0 ;
-    
-    } END_REPEAT
 
+    #ifdef sampleTime 
+    } END_REPEAT
+    #endif
+
+#if defined IS_INPUT
     uint8 state = object[index].getState() ;
     if( state == FALLING ) sendState( index, 1 ) ;                              // depending on interface, must either transmit detector state
     if( state ==  RISING ) sendState( index, 0 ) ;                              // or take control of a point   
